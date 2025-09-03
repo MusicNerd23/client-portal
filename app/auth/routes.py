@@ -3,10 +3,12 @@ from flask_login import login_user, logout_user, login_required
 from .forms import LoginForm, RegistrationForm
 from ..models import User, Organization
 from ..extensions import db
+from ..extensions import limiter
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     form = LoginForm()
     if form.validate_on_submit():

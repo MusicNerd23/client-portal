@@ -1,7 +1,7 @@
 .PHONY: dev lint fmt test build-css run migrate
 
 dev:
-	flask run
+	flask --app app.py run
 
 lint:
 	ruff check .

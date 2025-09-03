@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1>Login</h1>
 <div class="flex items-center justify-center">
     <div class="w-full max-w-md">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="mb-4 p-3 rounded bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-100">
+              {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
         <form class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4" method="POST" action="{{ url_for('auth.login') }}">
             {{ form.hidden_tag() }}
             <div class="mb-4">

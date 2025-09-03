@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Dark-mode text visibility overrides for common gray text classes */
+@layer utilities {
+  .dark .text-gray-700 { color: theme('colors.slate.200'); }
+  .dark .text-gray-600 { color: theme('colors.slate.300'); }
+  .dark .text-gray-800 { color: theme('colors.slate.100'); }
+}

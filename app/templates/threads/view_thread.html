@@ -11,6 +11,18 @@
                 <li class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <p class="text-gray-700">{{ message.body }}</p>
                     <p class="text-gray-600 text-sm">By: {{ message.author_id }} at {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% if message.attachments and message.attachments.file_ids %}
+                        <div class="mt-2">
+                            <span class="text-sm text-gray-600">Attachments:</span>
+                            <ul class="list-disc ml-6">
+                                {% for fid in message.attachments.file_ids %}
+                                    <li>
+                                        <a class="text-blue-500 hover:underline" href="{{ url_for('files.download_file', file_id=fid) }}">Download attachment {{ fid }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
@@ -21,11 +33,15 @@
 
 <div class="my-4">
     <h2 class="text-xl font-semibold">Send Message</h2>
-    <form method="POST" action="{{ url_for('threads.view_thread', thread_id=thread.id) }}">
+    <form method="POST" action="{{ url_for('threads.view_thread', thread_id=thread.id) }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="mb-4">
             {{ form.body.label(class="block text-gray-700 text-sm font-bold mb-2") }}
             {{ form.body(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+        </div>
+        <div class="mb-4">
+            {{ form.attachment.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.attachment(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
         </div>
         {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
     </form>

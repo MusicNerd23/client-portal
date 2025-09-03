@@ -2,4 +2,22 @@
 
 {% block content %}
 <h1 class="text-2xl font-bold">{{ organization.name }} Dashboard</h1>
+
+<div class="mt-6">
+  <h2 class="text-xl font-semibold">Recent Activity</h2>
+  {% if recent %}
+    <ul class="mt-2">
+      {% for a in recent %}
+        <li class="bg-white dark:bg-slate-800 shadow rounded px-4 py-3 mb-2 text-sm text-slate-700 dark:text-slate-200">
+          {{ a.created_at.strftime('%Y-%m-%d %H:%M') }} — {{ a.action }}
+          {% if a.target_type and a.target_id %}
+            ({{ a.target_type }} #{{ a.target_id }})
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-slate-600">No activity yet.</p>
+  {% endif %}
+</div>
 {% endblock %}

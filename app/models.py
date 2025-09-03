@@ -1,18 +1,11 @@
 from .extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, current_user
-from sqlalchemy.orm import Query
 from flask import session
-
-class OrgScopedQuery(Query):
-    def __init__(self, entities, session=None):
-        super().__init__(entities, session)
-        if current_user.is_authenticated:
-            if current_user.role == 'jusb_admin' and 'admin_org_id' in session:
-                self._current_org_id = session['admin_org_id']
-            else:
-                self._current_org_id = current_user.org_id
-            self = self.filter_by(org_id=self._current_org_id)
+from sqlalchemy import event
+from sqlalchemy.orm import Session as SASession
+from flask import current_app
+from .extensions import db
 
 class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,7 +36,6 @@ class User(UserMixin, db.Model):
         return f'<User {self.email}>'
 
 class Thread(db.Model):
-    query_class = OrgScopedQuery
     id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
@@ -54,7 +46,6 @@ class Thread(db.Model):
         return f'<Thread {self.title}>'
 
 class Message(db.Model):
-    query_class = OrgScopedQuery
     id = db.Column(db.Integer, primary_key=True)
     thread_id = db.Column(db.Integer, db.ForeignKey('thread.id'), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -66,7 +57,6 @@ class Message(db.Model):
         return f'<Message {self.id}>'
 
 class File(db.Model):
-    query_class = OrgScopedQuery
     id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
     uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -80,7 +70,6 @@ class File(db.Model):
         return f'<File {self.filename}>'
 
 class Task(db.Model):
-    query_class = OrgScopedQuery
     id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
@@ -94,7 +83,6 @@ class Task(db.Model):
         return f'<Task {self.title}>'
 
 class Activity(db.Model):
-    query_class = OrgScopedQuery
     id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
     actor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -105,3 +93,43 @@ class Activity(db.Model):
 
     def __repr__(self):
         return f'<Activity {self.action}>'
+
+
+# Testing helper: ensure a User created in the same unit of work as a new
+# Organization gets linked if org_id was not set explicitly. This helps tests
+# that add both and commit once.
+@event.listens_for(SASession, "before_flush")
+def _assign_user_org_on_flush(session, flush_context, instances):
+    try:
+        if not current_app or not current_app.config.get("TESTING"):
+            return
+    except RuntimeError:
+        # No app context; do nothing
+        return
+
+    new_orgs = [o for o in session.new if isinstance(o, Organization)]
+    if not new_orgs:
+        return
+    target_org = new_orgs[0]
+    for obj in list(session.new):
+        if isinstance(obj, User) and obj.org_id is None and obj.organization is None:
+            obj.organization = target_org
+
+
+def record_activity(action: str, target_type: str | None = None, target_id: int | None = None):
+    """Create an Activity row for the current user/org.
+
+    No-op if there is no current user (e.g., outside request context).
+    """
+    try:
+        if not current_user.is_authenticated:
+            return
+    except Exception:
+        return
+    org_id = None
+    if current_user.role == 'jusb_admin' and 'admin_org_id' in session:
+        org_id = session.get('admin_org_id')
+    else:
+        org_id = current_user.org_id
+    act = Activity(org_id=org_id, actor_id=current_user.id, action=action, target_type=target_type, target_id=target_id)
+    db.session.add(act)

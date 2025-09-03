@@ -1,7 +1,8 @@
 from flask import Flask
 from config import Config
-from .extensions import db, login_manager, migrate
+from .extensions import db, login_manager, migrate, csrf, limiter
 from .models import User
+from sqlalchemy.exc import SQLAlchemyError
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -10,10 +11,18 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
+    limiter.init_app(app)
 
     @login_manager.user_loader
     def load_user(id):
-        return User.query.get(int(id))
+        try:
+            return db.session.get(User, int(id))
+        except SQLAlchemyError:
+            # DB might not be initialized yet; treat as anonymous
+            return None
+
+    login_manager.login_view = 'auth.login'
 
     from .auth.routes import auth
     app.register_blueprint(auth, url_prefix='/auth')
@@ -33,8 +42,12 @@ def create_app(config_class=Config):
     from .admin.routes import admin
     app.register_blueprint(admin, url_prefix='/admin')
 
+    from .profile import profile
+    app.register_blueprint(profile)
+
     @app.route('/')
     def index():
-        return '<h1>Client Portal</h1>'
+        from flask import render_template
+        return render_template('home.html')
 
     return app

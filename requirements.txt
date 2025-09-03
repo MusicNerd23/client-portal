@@ -10,3 +10,5 @@ werkzeug
 click
 Flask-SQLAlchemy
 Flask-Migrate
+email-validator
+Flask-Limiter

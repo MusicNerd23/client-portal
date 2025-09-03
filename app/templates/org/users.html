@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-bold">{{ organization.name }} Users</h1>
+
+<div class="my-4">
+  <h2 class="text-xl font-semibold">Add User</h2>
+  <form method="POST" action="{{ url_for('org.users') }}">
+    {{ form.hidden_tag() }}
+    <div class="mb-2">{{ form.email.label }} {{ form.email(class="border rounded px-2 py-1") }}</div>
+    <div class="mb-2">{{ form.password.label }} {{ form.password(class="border rounded px-2 py-1") }}</div>
+    <div class="mb-2">{{ form.role.label }} {{ form.role(class="border rounded px-2 py-1") }}</div>
+    {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded") }}
+  </form>
+</div>
+
+<h2 class="text-xl font-semibold mt-6">Existing Users</h2>
+{% if users %}
+  <ul>
+  {% for u in users %}
+    <li class="bg-white dark:bg-slate-800 shadow rounded px-4 py-3 mb-2 flex items-center justify-between">
+      <div>
+        <div class="font-medium">{{ u.email }}</div>
+        <div class="text-sm text-slate-600">Role: {{ u.role }}</div>
+      </div>
+      <form method="POST" action="{{ url_for('org.users_remove', user_id=u.id) }}">
+        {{ delete_form.hidden_tag() }}
+        {{ delete_form.user_id(value=u.id) }}
+        {{ delete_form.submit(class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-1 px-3 rounded", value='Remove') }}
+      </form>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No users yet.</p>
+{% endif %}
+{% endblock %}
+

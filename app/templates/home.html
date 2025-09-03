@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-8">
+  <h1 class="text-3xl font-bold">Welcome to the JusB/Mg4tech Client Portal</h1>
+  <p class="mt-2 text-gray-700 dark:text-gray-300">Secure workspace for threads, files, and tasks.</p>
+
+  {% if current_user.is_authenticated %}
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <a href="{{ url_for('org.dashboard') }}" class="block p-4 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-600">
+      <h3 class="text-lg font-semibold">Dashboard</h3>
+      <p class="text-gray-600 dark:text-gray-300">Organization overview and recent activity</p>
+    </a>
+    <a href="{{ url_for('threads.index') }}" class="block p-4 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-600">
+      <h3 class="text-lg font-semibold">Threads</h3>
+      <p class="text-gray-600 dark:text-gray-300">Discuss and share updates</p>
+    </a>
+    <a href="{{ url_for('files.index') }}" class="block p-4 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-600">
+      <h3 class="text-lg font-semibold">Files</h3>
+      <p class="text-gray-600 dark:text-gray-300">Upload and download documents</p>
+    </a>
+    <a href="{{ url_for('tasks.index') }}" class="block p-4 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-600">
+      <h3 class="text-lg font-semibold">Tasks</h3>
+      <p class="text-gray-600 dark:text-gray-300">Track work and progress</p>
+    </a>
+    {% if current_user.role == 'jusb_admin' %}
+    <a href="{{ url_for('admin.index') }}" class="block p-4 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-600">
+      <h3 class="text-lg font-semibold">Admin</h3>
+      <p class="text-gray-600 dark:text-gray-300">Global overview and org switching</p>
+    </a>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="mt-6 flex gap-3">
+    <a href="{{ url_for('auth.login') }}" class="px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700">Login</a>
+    <a href="{{ url_for('auth.register') }}" class="px-4 py-2 rounded border border-slate-300 dark:border-slate-600">Register</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+

@@ -1,8 +1,13 @@
 import click
 from flask.cli import with_appcontext
-from app import db
+from app import create_app
+from app.extensions import db
 from app.models import User, Organization
 from werkzeug.security import generate_password_hash
+
+# Ensure app context exists when invoking this script directly
+app = create_app()
+app.app_context().push()
 
 @click.group()
 def cli():

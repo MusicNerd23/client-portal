@@ -22,7 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('slug', sa.String(length=100), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('slug')
     )
@@ -33,7 +33,7 @@ def upgrade():
     sa.Column('password_hash', sa.String(length=256), nullable=True),
     sa.Column('role', sa.String(length=20), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['org_id'], ['organization.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -45,7 +45,7 @@ def upgrade():
     sa.Column('action', sa.String(length=100), nullable=False),
     sa.Column('target_type', sa.String(length=100), nullable=True),
     sa.Column('target_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['actor_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['org_id'], ['organization.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -58,7 +58,7 @@ def upgrade():
     sa.Column('path', sa.String(length=200), nullable=False),
     sa.Column('mime', sa.String(length=100), nullable=False),
     sa.Column('size', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['org_id'], ['organization.id'], ),
     sa.ForeignKeyConstraint(['uploader_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -71,7 +71,7 @@ def upgrade():
     sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('assignee_id', sa.Integer(), nullable=True),
     sa.Column('due_date', sa.DateTime(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['assignee_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['org_id'], ['organization.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -80,7 +80,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('org_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=200), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['created_by'], ['user.id'], ),
     sa.ForeignKeyConstraint(['org_id'], ['organization.id'], ),
@@ -92,7 +92,7 @@ def upgrade():
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.Column('body', sa.Text(), nullable=False),
     sa.Column('attachments', sa.JSON(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['thread_id'], ['thread.id'], ),
     sa.PrimaryKeyConstraint('id')
