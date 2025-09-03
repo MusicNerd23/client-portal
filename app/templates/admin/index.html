@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-2xl font-bold">Admin</h1>
+<h1 class="text-2xl font-bold">Admin Dashboard</h1>
+
+<h2 class="text-xl font-semibold mt-8">Organizations</h2>
+<ul>
+    {% for org in organizations %}
+        <li>
+            {{ org.name }} ({{ org.slug }})
+            <a href="{{ url_for('admin.switch_org', org_id=org.id) }}" class="text-blue-500 hover:underline">Switch</a>
+        </li>
+    {% endfor %}
+</ul>
+
+<h2 class="text-xl font-semibold mt-8">Users</h2>
+<ul>
+    {% for user in users %}
+        <li>
+            {{ user.email }} ({{ user.role }}) - Org: {{ user.organization.name }}
+        </li>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('admin.clear_switch_org') }}" class="text-blue-500 hover:underline mt-4 inline-block">Clear Organization Switch</a>
 {% endblock %}

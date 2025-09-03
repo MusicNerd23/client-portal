@@ -8,3 +8,5 @@ python-dotenv
 gunicorn
 werkzeug
 click
+Flask-SQLAlchemy
+Flask-Migrate

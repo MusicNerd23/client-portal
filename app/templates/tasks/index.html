@@ -2,4 +2,36 @@
 
 {% block content %}
 <h1 class="text-2xl font-bold">Tasks</h1>
+
+<div class="my-4">
+    <h2 class="text-xl font-semibold">Create New Task</h2>
+    <form method="POST" action="{{ url_for('tasks.index') }}">
+        {{ form.hidden_tag() }}
+        <div class="mb-4">
+            {{ form.title.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.title(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+        </div>
+        <div class="mb-4">
+            {{ form.description.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.description(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+        </div>
+        {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+    </form>
+</div>
+
+<h2 class="text-xl font-semibold mt-8">Existing Tasks</h2>
+{% if tasks %}
+    <ul>
+        {% for task in tasks %}
+            <li class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <h3 class="text-lg font-medium">{{ task.title }}</h3>
+                <p class="text-gray-700">{{ task.description }}</p>
+                <p class="text-gray-600 text-sm">Status: {{ task.status }}</p>
+                <p class="text-gray-600 text-sm">Created: {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No tasks yet. Create one!</p>
+{% endif %}
 {% endblock %}

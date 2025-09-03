@@ -2,4 +2,32 @@
 
 {% block content %}
 <h1 class="text-2xl font-bold">Files</h1>
+
+<div class="my-4">
+    <h2 class="text-xl font-semibold">Upload New File</h2>
+    <form method="POST" action="{{ url_for('files.index') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-4">
+            {{ form.file.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.file(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+        </div>
+        {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+    </form>
+</div>
+
+<h2 class="text-xl font-semibold mt-8">Existing Files</h2>
+{% if files %}
+    <ul>
+        {% for file in files %}
+            <li class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <a href="{{ url_for('files.download_file', file_id=file.id) }}" class="text-blue-500 hover:underline">
+                    {{ file.filename }} ({{ file.size / 1024 / 1024 | round(2) }} MB)
+                </a>
+                <p class="text-gray-600 text-sm">Uploaded by: {{ file.uploader_id }} on {{ file.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No files yet. Upload one!</p>
+{% endif %}
 {% endblock %}
