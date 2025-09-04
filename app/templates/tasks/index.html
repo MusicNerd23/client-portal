@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-2xl font-bold">Tasks</h1>
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-bold">Tasks</h1>
+  <a class="text-blue-500 hover:underline" href="{{ url_for('tasks.kanban') }}">Kanban view</a>
+  </div>
 
 <div class="my-4">
     <h2 class="text-xl font-semibold">Create New Task</h2>

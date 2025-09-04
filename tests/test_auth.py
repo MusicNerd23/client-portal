@@ -1,4 +1,3 @@
-from . import client
 
 def test_login_logout(client):
     # Test login
@@ -9,7 +8,7 @@ def test_login_logout(client):
     assert response.status_code == 200
     assert b'Dashboard' in response.data
 
-    # Test logout
-    response = client.get('/auth/logout', follow_redirects=True)
+    # Test logout via POST (CSRF disabled in tests)
+    response = client.post('/auth/logout', follow_redirects=True)
     assert response.status_code == 200
     assert b'Login' in response.data

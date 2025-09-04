@@ -10,7 +10,7 @@
             {% for message in messages %}
                 <li class="bg-white dark:bg-slate-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <p class="text-gray-700">{{ message.body }}</p>
-                    <p class="text-gray-600 text-sm">By: {{ message.author_id }} at {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p class="text-gray-600 text-sm">By: {{ message.author.email if message.author else message.author_id }} at {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
                     {% if message.attachments and message.attachments.file_ids %}
                         <div class="mt-2">
                             <span class="text-sm text-gray-600">Attachments:</span>

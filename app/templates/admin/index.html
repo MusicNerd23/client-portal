@@ -3,6 +3,10 @@
 {% block content %}
 <h1 class="text-2xl font-bold">Admin Dashboard</h1>
 
+<div class="mt-2">
+  <a class="text-blue-500 hover:underline" href="{{ url_for('admin.tickets_overview') }}">Tickets Overview</a>
+  </div>
+
 <h2 class="text-xl font-semibold mt-8">Organizations</h2>
 <ul>
     {% for org in organizations %}

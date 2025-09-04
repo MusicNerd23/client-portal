@@ -1,7 +1,6 @@
 import os
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_from_directory, current_app, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_from_directory, abort
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
 from ..models import File
 from ..extensions import db, limiter
 from .forms import FileUploadForm, FileDeleteForm

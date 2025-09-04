@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
 from .forms import LoginForm, RegistrationForm
 from ..models import User, Organization
@@ -22,6 +22,13 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    # Legacy GET logout for compatibility
+    logout_user()
+    return redirect(url_for('auth.login'))
+
+@auth.route('/logout', methods=['POST'])
+@login_required
+def logout_post():
     logout_user()
     return redirect(url_for('auth.login'))
 

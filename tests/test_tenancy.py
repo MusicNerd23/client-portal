@@ -1,4 +1,3 @@
-from . import client
 from app.models import User, Organization
 from app import db
 

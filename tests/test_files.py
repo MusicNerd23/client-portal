@@ -1,4 +1,3 @@
-from . import client
 
 def test_files_page(client):
     # Login the user

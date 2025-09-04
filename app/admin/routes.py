@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session
-from flask_login import login_required, current_user
+from flask_login import login_required
 from ..security import role_required
-from ..models import Organization, User
+from ..models import Organization, User, Ticket
+from ..extensions import db
 
 admin = Blueprint('admin', __name__)
 
@@ -29,3 +30,18 @@ def clear_switch_org():
     session.pop('admin_org_id', None)
     flash('Cleared organization switch.')
     return redirect(url_for('org.dashboard'))
+
+@admin.route('/tickets')
+@login_required
+@role_required('jusb_admin')
+def tickets_overview():
+    # Basic overview across all orgs
+    counts = {
+        'new': db.session.query(Ticket).filter_by(status='new').count(),
+        'open': db.session.query(Ticket).filter_by(status='open').count(),
+        'pending': db.session.query(Ticket).filter_by(status='pending').count(),
+        'resolved': db.session.query(Ticket).filter_by(status='resolved').count(),
+        'closed': db.session.query(Ticket).filter_by(status='closed').count(),
+    }
+    recent = Ticket.query.order_by(Ticket.created_at.desc()).limit(25).all()
+    return render_template('admin/tickets.html', counts=counts, recent=recent)

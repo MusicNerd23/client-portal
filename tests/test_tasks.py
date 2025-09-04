@@ -1,4 +1,3 @@
-from . import client
 
 def test_tasks_page(client):
     # Login the user

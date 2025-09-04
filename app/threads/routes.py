@@ -1,16 +1,20 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort, session
+import os
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 from ..models import Thread, Message, File
-from ..extensions import db
+from ..extensions import db, limiter
 from .forms import ThreadForm, MessageForm
 from ..files.routes import allowed_file
 from ..storage import get_storage
 from ..models import record_activity
 from ..tenancy import current_org_id
+from ..models import User, Message as MessageModel
+from ..notifications import send_email
 
 threads = Blueprint('threads', __name__)
 
 @threads.route('/', methods=['GET', 'POST'])
+@limiter.limit("20 per minute")
 @login_required
 def index():
     form = ThreadForm()
@@ -28,6 +32,7 @@ def index():
     return render_template('threads/index.html', threads=all_threads, form=form)
 
 @threads.route('/thread/<int:thread_id>', methods=['GET', 'POST'])
+@limiter.limit("60 per minute")
 @login_required
 def view_thread(thread_id):
     thread = Thread.query.get_or_404(thread_id)
@@ -63,6 +68,20 @@ def view_thread(thread_id):
         db.session.flush()
         record_activity('message.create', 'Message', message.id)
         db.session.commit()
+        # Notify other participants and org admins
+        try:
+            participant_ids = [row.author_id for row in MessageModel.query.with_entities(MessageModel.author_id).filter_by(thread_id=thread.id).distinct().all()]
+            recipient_users = User.query.filter(User.id.in_(participant_ids), User.id != current_user.id).all()
+            admin_users = User.query.filter_by(org_id=thread.org_id, role='client_admin').all()
+            recipients = {u.email for u in recipient_users + admin_users}
+            if recipients:
+                send_email(
+                    subject=f"New message in: {thread.title}",
+                    body=f"{current_user.email} wrote:\n\n{message.body}",
+                    recipients=list(recipients),
+                )
+        except Exception:
+            pass
         flash('Your message has been sent!')
         return redirect(url_for('threads.view_thread', thread_id=thread.id))
     

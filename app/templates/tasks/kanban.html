@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-bold">Tasks – Kanban</h1>
+  <a class="text-blue-500 hover:underline" href="{{ url_for('tasks.index') }}">List view</a>
+  </div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4" id="kanban-board">
+  {% for key, title in {'open':'To Do','in_progress':'In Progress','done':'Done'}.items() %}
+  <div class="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-3" data-status="{{ key }}">
+    <h2 class="font-semibold mb-2">{{ title }}</h2>
+    <div class="space-y-2">
+      {% for task in columns[key] %}
+      <div class="p-3 rounded bg-slate-50 dark:bg-slate-700" draggable="true" data-task-id="{{ task.id }}">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="font-medium">{{ task.title }}</div>
+            <div class="text-sm text-slate-600 dark:text-slate-300">{{ task.description }}</div>
+          </div>
+          <form method="POST" action="{{ url_for('tasks.update_status', task_id=task.id) }}" class="ml-2">
+            {{ status_form.hidden_tag() }}
+            {{ status_form.status(class="border rounded px-2 py-1 text-sm", value=key) }}
+            <button class="ml-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Move</button>
+          </form>
+        </div>
+        <form method="POST" action="{{ url_for('tasks.delete', task_id=task.id) }}" class="mt-1 text-right">
+          {{ delete_form.hidden_tag() }}
+          {{ delete_form.task_id(value=task.id) }}
+          <button class="text-xs bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded">Delete</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="text-sm text-slate-500">No tasks</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

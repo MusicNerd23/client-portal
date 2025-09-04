@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-bold">Admin: Tickets Overview</h1>
+  <a class="text-blue-500 hover:underline" href="{{ url_for('admin.index') }}">Admin home</a>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+  {% for k, v in counts.items() %}
+  <div class="p-3 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+    <div class="text-xs uppercase text-slate-500">{{ k }}</div>
+    <div class="text-2xl font-semibold">{{ v }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 class="text-xl font-semibold mt-6">Recent Tickets</h2>
+<div class="mt-2 divide-y divide-slate-200 dark:divide-slate-700">
+  {% for t in recent %}
+  <div class="py-2">
+    <div class="font-medium">#{{ t.id }} — {{ t.subject }}</div>
+    <div class="text-sm text-slate-600 dark:text-slate-300">Org: {{ t.org_id }} • Status: {{ t.status }} • Priority: {{ t.priority }} • Assigned: {{ t.assigned_to.email if t.assigned_to else '—' }} • Created: {{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+  </div>
+  {% else %}
+  <div class="py-2 text-slate-600">No tickets yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}
+

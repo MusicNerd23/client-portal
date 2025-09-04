@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from ..models import Task
 from ..extensions import db
@@ -46,6 +46,21 @@ def update_status(task_id):
     else:
         flash('Invalid status update')
     return redirect(url_for('tasks.index'))
+
+
+@tasks.route('/kanban')
+@login_required
+def kanban():
+    org_id = current_org_id()
+    all_tasks = Task.query.filter_by(org_id=org_id).all()
+    columns = {
+        'open': [t for t in all_tasks if t.status == 'open'],
+        'in_progress': [t for t in all_tasks if t.status == 'in_progress'],
+        'done': [t for t in all_tasks if t.status == 'done'],
+    }
+    status_form = TaskStatusForm()
+    delete_form = TaskDeleteForm()
+    return render_template('tasks/kanban.html', columns=columns, status_form=status_form, delete_form=delete_form)
 
 
 @tasks.route('/<int:task_id>/delete', methods=['POST'])

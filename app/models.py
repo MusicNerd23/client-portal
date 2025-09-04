@@ -5,7 +5,6 @@ from flask import session
 from sqlalchemy import event
 from sqlalchemy.orm import Session as SASession
 from flask import current_app
-from .extensions import db
 
 class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,6 +55,8 @@ class Message(db.Model):
     def __repr__(self):
         return f'<Message {self.id}>'
 
+    author = db.relationship('User', foreign_keys=[author_id])
+
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
@@ -94,6 +95,37 @@ class Activity(db.Model):
     def __repr__(self):
         return f'<Activity {self.action}>'
 
+
+# Support Tickets
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    org_id = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    subject = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default='new')  # new, open, pending, resolved, closed
+    priority = db.Column(db.String(20), nullable=False, default='normal')  # low, normal, high, urgent
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
+    assigned_to = db.relationship('User', foreign_keys=[assigned_to_id])
+
+    def __repr__(self):
+        return f'<Ticket {self.id}: {self.subject}>'
+
+
+class TicketComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    author = db.relationship('User', foreign_keys=[author_id])
+
+    def __repr__(self):
+        return f'<TicketComment {self.id}>'
 
 # Testing helper: ensure a User created in the same unit of work as a new
 # Organization gets linked if org_id was not set explicitly. This helps tests

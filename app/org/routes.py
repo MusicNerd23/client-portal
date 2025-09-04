@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import login_required, current_user
+from flask_login import login_required
 from ..security import role_required, roles_required
 from ..models import Organization, Activity, User
 from ..tenancy import current_org_id
@@ -11,8 +11,16 @@ org = Blueprint('org', __name__)
 @org.route('/dashboard')
 @login_required
 def dashboard():
-    organization = Organization.query.get(current_org_id())
-    recent = Activity.query.filter_by(org_id=current_org_id()).order_by(Activity.created_at.desc()).limit(20).all()
+    org_id = current_org_id()
+    if not org_id:
+        from flask import abort
+        abort(403)
+    organization = db.session.get(Organization, org_id)
+    if not organization:
+        from flask import flash, redirect
+        flash('Your account is not linked to an organization. Please contact support.')
+        return redirect(url_for('index'))
+    recent = Activity.query.filter_by(org_id=org_id).order_by(Activity.created_at.desc()).limit(20).all()
     return render_template('org/dashboard.html', organization=organization, recent=recent)
 
 @org.route('/<int:org_id>/dashboard')
@@ -20,7 +28,7 @@ def dashboard():
 @role_required('jusb_admin')
 def dashboard_scoped(org_id):
     # Admin-only view of a specific organization's dashboard
-    organization = Organization.query.get_or_404(org_id)
+    organization = db.session.get(Organization, org_id)
     recent = Activity.query.filter_by(org_id=org_id).order_by(Activity.created_at.desc()).limit(20).all()
     return render_template('org/dashboard.html', organization=organization, recent=recent)
 
@@ -30,7 +38,7 @@ def dashboard_scoped(org_id):
 @roles_required('client_admin', 'jusb_admin')
 def users():
     org_id = current_org_id()
-    organization = Organization.query.get_or_404(org_id)
+    organization = db.session.get(Organization, org_id)
     form = OrgUserCreateForm()
     delete_form = OrgUserDeleteForm()
     if form.validate_on_submit():
@@ -57,7 +65,7 @@ def users():
 @roles_required('client_admin', 'jusb_admin')
 def users_remove(user_id):
     org_id = current_org_id()
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
     if user.org_id != org_id:
         flash('Cannot modify users from another organization')
         return redirect(url_for('org.users'))
